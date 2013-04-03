@@ -69,9 +69,11 @@
             };
             
             var killFrequency = function(freq) {
-                notes[freq.toString()].oscillator.disconnect();
-                notes[freq.toString()].gainNode.disconnect();
-                notes[freq.toString()] = null;
+                if(notes[freq.toString()]) {
+                    notes[freq.toString()].oscillator.disconnect();
+                    notes[freq.toString()].gainNode.disconnect();
+                    notes[freq.toString()] = null;
+                }
             };
 
             socket.on("play freq", function (data) {
