@@ -10,7 +10,11 @@
             height: 100%;
         }
         body {
-            background: #333;
+            background: hsl(0,0%,20%);
+            -webkit-transition: background-color 1s;
+            -moz-transition: background-color 1s;
+            -ms-transition: background-color 1s;
+            transition: background-color 1s;
         }
         #touch {
             position: absolute;
@@ -33,6 +37,9 @@
             left: -1000px;
             margin: -30px 0 0 -30px;
             -webkit-transform: translateZ(0);
+            -moz-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            transform: translateZ(0);
         }
         .touches .touch:nth-child(1) { background: #f00; }
         .touches .touch:nth-child(2) { background: #ff0; }
@@ -50,7 +57,7 @@
             var notes = [];
             
             var playFrequency = function(freq) {
-                if(!notes[freq.toString()]) {
+                if(!notes[String(freq)]) {
                     var note = {};
                     
                     note.oscillator = context.createOscillator();
@@ -64,15 +71,17 @@
                     note.gainNode.gain.value = 0.35;
                     note.oscillator.noteOn && note.oscillator.noteOn(0); // this method doesn't seem to exist, though it's in the docs?
                     
-                    notes[freq.toString()] = note;
+                    notes[String(freq)] = note;
                 }
+                
+                //$("body").css("background-color", "hsl("+hue+",80%,40%)");
             };
             
             var killFrequency = function(freq) {
-                if(notes[freq.toString()]) {
-                    notes[freq.toString()].oscillator.disconnect();
-                    notes[freq.toString()].gainNode.disconnect();
-                    notes[freq.toString()] = null;
+                if(notes[String(freq)]) {
+                    notes[String(freq)].oscillator.disconnect();
+                    notes[String(freq)].gainNode.disconnect();
+                    notes[String(freq)] = undefined;
                 }
             };
 
