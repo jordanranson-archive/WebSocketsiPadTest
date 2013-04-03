@@ -33,7 +33,10 @@ function handler (request, response) {
 }
 
 io.sockets.on("connection", function (socket) {
-    socket.on("send pos", function (data) {
-        socket.broadcast.emit("update pos", data);
+    socket.on("play freq", function (data) {
+        socket.broadcast.emit("play freq", data);
+    });
+    socket.on("kill freq", function (data) {
+        socket.broadcast.emit("kill freq", data);
     });
 });

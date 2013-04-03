@@ -25,69 +25,100 @@
             -ms-perspective: 1000;
             perspective: 1000;
         }
-        #window {
-            position: absolute;
-            top: 13%;
-            left: 13%;
-            bottom: 13%;
-            right: 13%;
-            background: #ccc;
+        .key {
+            width: 84px;
+            height: 768px;
+            margin-right: 6px;
+            float: left;
+            background: #fff;
+            font-family: Tahoma;
+            font-size: 8pt;
+            line-height: 60px;
+            text-align: center;
+        }
+        .key:last-child {
+            margin: 0;
+        }
+        .key.middle-c {
+            background: #0ff;
+        }   
+        .key.black {
+            color: #fff;
+            background: #000;
+            width: 55px;
+        }   
+        .key.pressed {
+            background: #ff0 !important;
         }
     </style>
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
         window.addEventListener("load", function() {
-            var posStart = [];
-            var pos = [0,0];
+            var isMobile = (
+                navigator.userAgent.match(/Android/i)
+                || navigator.userAgent.match(/webOS/i)
+                || navigator.userAgent.match(/iPhone/i)
+                || navigator.userAgent.match(/iPad/i)
+                || navigator.userAgent.match(/iPod/i)
+                || navigator.userAgent.match(/BlackBerry/i)
+                || navigator.userAgent.match(/Windows Phone/i)
+            );
+                
+            var _evtStart = isMobile ? "touchstart" : "mousedown";
+            var _evtMove =  isMobile ? "touchmove"  : "mousemove";
+            var _evtEnd =   isMobile ? "touchend"   : "mouseup";
+        
             var divTouch = document.getElementById("touch");
-            var divWindow = document.getElementById("window");
             var socket = io.connect(window.location.host);
+            var keys = document.querySelectorAll(".key");
             
-            // Mouse down/touch start;
-            divTouch.addEventListener("touchstart", function(e) {
+            divTouch.addEventListener(_evtMove, function(e) {
                 e.preventDefault();
-                posStart = [e.touches[0].pageX, e.touches[0].pageY];
-                
-                var touches = [];
-                for(var i = 0; i < e.touches.length; i++) {
-                    touches.push([e.touches[i].pageX, e.touches[i].pageY]);
-                };
-                socket.emit("send pos", { pos: pos, touches: touches });
             }, false);
             
-            // Mouse move/touch move
-            divTouch.addEventListener("touchmove", function(e) {
-                e.preventDefault();
-                var curPos = [e.touches[0].pageX, e.touches[0].pageY];
-                var adjPos = [curPos[0] - posStart[0], curPos[1] - posStart[1]];
-                pos[0] += Number(adjPos[0]);
-                pos[1] += Number(adjPos[1]);
+            for(var i = 34; i < 47; i++) {
+                var key = document.createElement("div");
+                key.freq = (Math.pow(2, ((i + 1) - 49) / 12) * 440).toFixed(3);
                 
-                /*divWindow.setAttribute("style",
-                    "-webkit-transform: rotateX(" + (1 - Math.round(pos[1] / 10)) + "deg) " + 
-                    "rotateY(" + Math.round(pos[0] / 10) + "deg)"
-                );*/
-                var touches = [];
-                for(var i = 0; i < e.touches.length; i++) {
-                    touches.push([e.touches[i].pageX, e.touches[i].pageY]);
-                };
-                socket.emit("send pos", { pos: pos, touches: touches });
+                key.innerHTML = key.freq +"("+(i + 1)+")";
+                $(key).addClass("key");
+                if(i === 39) {
+                    $(key).addClass("middle-c");
+                }
+                var k = i + 1;
+                if(k % 12 === 0 || k % 12 === 2 || k % 12 === 5 || k % 12 === 7 || k % 12 === 9) {
+                    $(key).addClass("black");
+                }
                 
-                posStart = curPos;
-            }, false);
-            
-            // Mouse up/touch end
-            divTouch.addEventListener("touchend", function(e) {
-                e.preventDefault();
-                socket.emit("send pos", { pos: pos, touches: [] });
-            }, false);
+                key.addEventListener(_evtStart, function(e) {
+                    e.preventDefault();
+                    socket.emit("play freq", { freq: this.freq });
+                    $(this).addClass("pressed");
+                }, false);
+                
+                key.addEventListener(_evtEnd, function(e) {
+                    e.preventDefault();
+                    socket.emit("kill freq", { freq: this.freq });
+                    $(this).removeClass("pressed");
+                }, false);
+                
+                $(".keys").append(key);
+            }
         });
     </script>
 </head>
 <body>
     <div id="touch">
-        <div id="window"></div>
+        <div class="keys">
+            <!--<div class="key" data-freq="349.228" data-key="45"></div>
+            <div class="key" data-freq="329.628" data-key="44"></div>
+            <div class="key" data-freq="293.665" data-key="42"></div>
+            <div class="key" data-freq="261.626" data-key="40"></div>
+            <div class="key" data-freq="246.942" data-key="39"></div>
+            <div class="key" data-freq="220.000" data-key="37"></div>
+            <div class="key" data-freq="195.998" data-key="35"></div>-->
+        </div>
     </div>
 </body>
 </html>

@@ -50,20 +50,22 @@
             var notes = [];
             
             var playFrequency = function(freq) {
-                var note = {};
-                
-                note.oscillator = context.createOscillator();
-                note.gainNode = context.createGainNode(); 
-                
-                note.oscillator.type = "square";
-                note.oscillator.frequency.value = freq;
-                note.oscillator.connect(note.gainNode);
-                
-                note.gainNode.connect(context.destination);
-                note.gainNode.gain.value = 0.2;
-                note.oscillator.noteOn && note.oscillator.noteOn(0); // this method doesn't seem to exist, though it's in the docs?
-                
-                notes[freq.toString()] = note;
+                if(!notes[freq.toString()]) {
+                    var note = {};
+                    
+                    note.oscillator = context.createOscillator();
+                    note.gainNode = context.createGainNode(); 
+                    
+                    note.oscillator.type = "square";
+                    note.oscillator.frequency.value = freq;
+                    note.oscillator.connect(note.gainNode);
+                    
+                    note.gainNode.connect(context.destination);
+                    note.gainNode.gain.value = 0.35;
+                    note.oscillator.noteOn && note.oscillator.noteOn(0); // this method doesn't seem to exist, though it's in the docs?
+                    
+                    notes[freq.toString()] = note;
+                }
             };
             
             var killFrequency = function(freq) {
@@ -73,35 +75,16 @@
             };
 
             socket.on("play freq", function (data) {
-                
-                
-                for(var i = 0; i < 5; i++) {
-                    $touch = $(".touch").eq(i);
-                    if(data.touches[i]) {
-                        touch = data.touches[i];
-                        $touch.css({
-                            left: touch[0] + "px",
-                            top: touch[1] + "px"
-                        });
-                    } else {
-                        $touch.css({
-                            left: "-1000px",
-                            top: "-1000px"
-                        });
-                    }
-                }
+                playFrequency(data.freq);
+            });
+            
+            socket.on("kill freq", function (data) {
+                killFrequency(data.freq);
             });
         });
     </script>
 </head>
 <body>
     <div id="touch"></div>
-    <div class="touches">
-        <div class="touch"></div>
-        <div class="touch"></div>
-        <div class="touch"></div>
-        <div class="touch"></div>
-        <div class="touch"></div>
-    </div>
 </body>
 </html>
